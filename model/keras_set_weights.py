@@ -20,12 +20,6 @@ from keras.constraints import Constraint
 from keras import backend as K
 import numpy as np
 
-#import tensorflow as tf
-#from keras.backend.tensorflow_backend import set_session
-#config = tf.ConfigProto()
-#config.gpu_options.per_process_gpu_memory_fraction = 0.42
-#set_session(tf.Session(config=config))
-
 D1W = np.array([-10, 0, -3, 1, -8, -6, 3, -13, 1, 0, -3, -7, -5, -3, 6, -1, -6, 0, -6, -4, -1, -2, 1, 1, -7, 2, 21, 10, -5, -20, 24, 23, 37, 8, -2, 33, -6, 22, 13, -2, 50, 8, 13, 1, -15, 30, -10, 30, 0, 3, 5, 27, 1, 4, -3, 41,
    56, 35, -2, 49, -13, 11, 13, -2,
    -47, 5, -16, -60, -15, 77, -17, 26,
@@ -11047,21 +11041,9 @@ p = []
 p.append(vad_output_weights)
 p.append(vad_output_bias)
 
-#model = Sequential()
-#model.add(Dense(24, input_shape = (None, 42), activation='tanh', name='input_dense', kernel_constraint=constraint, bias_constraint=constraint))
-#model.add(GRU(24, activation='tanh', recurrent_activation='sigmoid', return_sequences=True, name='vad_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg), kernel_constraint=constraint, recurrent_constraint=constraint, bias_constraint=constraint))
-#noise_input = Concatenate([tmp, vad_gru, main_input])
-#model.add(GRU(48, activation='relu', recurrent_activation='sigmoid', return_sequences=True, name='noise_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg), kernel_constraint=constraint, recurrent_constraint=constraint, bias_constraint=constraint))
-#denoise_input = Concatenate([vad_gru, noise_gru, main_input])
-#model.add(GRU(96, activation='tanh', recurrent_activation='sigmoid', return_sequences=True, name='denoise_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg), kernel_constraint=constraint, recurrent_constraint=constraint, bias_constraint=constraint))
-#model.add(Dense(22, activation='sigmoid', name='denoise_output', kernel_constraint=constraint, bias_constraint=constraint))
-
-
-
 main_input = Input(shape=(None, 42), name='main_input')
 tmp = Dense(24, activation='tanh', name='input_dense')(main_input)
 vad_gru = GRU(24, activation='tanh', recurrent_activation='sigmoid', return_sequences=True, name='vad_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg))(tmp)
-#vad_output = Dense(1, activation='sigmoid', name='vad_output', kernel_constraint=constraint, bias_constraint=constraint)(vad_gru)
 vad_output = Dense(1, activation='sigmoid', name='vad_output')(vad_gru)
 noise_input = keras.layers.concatenate([tmp, vad_gru, main_input])
 noise_gru = GRU(48, activation='relu', recurrent_activation='sigmoid', return_sequences=True, name='noise_gru', kernel_regularizer=regularizers.l2(reg), recurrent_regularizer=regularizers.l2(reg))(noise_input)
@@ -11073,15 +11055,6 @@ denoise_output = Dense(22, activation='sigmoid', name='denoise_output')(denoise_
 
 model = Model(inputs=main_input, outputs=[vad_output, denoise_output])
 
-#model.compile(loss=mycost,
-#              metrics=[msse],
-#              optimizer='adam', loss_weight=10)
-
-#layer_dict = dict([(layer.name, layer) for layer in model.layers])
-
-#for layer in model.layers:
-#  print(layer, layer.name)
-#  layer.get_weights()
 
 model.summary()
 model.layers[1].set_weights(l)
@@ -11102,39 +11075,5 @@ print(model.layers[7].get_weights())
 model.layers[8].set_weights(q)
 print(model.layers[8].get_weights())
 
-#batch_size = 32
-
-#print('Loading data...')
-#with h5py.File('denoise_data9.h5', 'r') as hf:
-#    all_data = hf['data'][:]
-#print('done.')
-
-#window_size = 2000
-
-#nb_sequences = len(all_data)//window_size
-#print(nb_sequences, ' sequences')
-#x_train = all_data[:nb_sequences*window_size, :42]
-#x_train = np.reshape(x_train, (nb_sequences, window_size, 42))
-
-#y_train = np.copy(all_data[:nb_sequences*window_size, 42:64])
-#y_train = np.reshape(y_train, (nb_sequences, window_size, 22))
-
-#noise_train = np.copy(all_data[:nb_sequences*window_size, 64:86])
-#noise_train = np.reshape(noise_train, (nb_sequences, window_size, 22))
-
-#vad_train = np.copy(all_data[:nb_sequences*window_size, 86:87])
-#vad_train = np.reshape(vad_train, (nb_sequences, window_size, 1))
-
-#all_data = 0;
-#x_train = x_train.astype('float32')
-#y_train = y_train.astype('float32')
-
-#print(len(x_train), 'train sequences. x shape =', x_train.shape, 'y shape = ', y_train.shape)
-
-#print('Train...')
-#model.fit(x_train, [y_train, vad_train],
-#          batch_size=batch_size,
-#          epochs=120,
-#          validation_split=0.1)
 model.save("rnn_noise_new.h5")
 print("Weights saved")
